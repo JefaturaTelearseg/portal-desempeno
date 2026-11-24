@@ -1,0 +1,578 @@
+{
+ "creado": "2026-11-18",
+ "grupos": [
+  {
+   "id": "G1",
+   "nombre": "GRUPO 1",
+   "tipo": "cctv"
+  },
+  {
+   "id": "G2",
+   "nombre": "GRUPO 2",
+   "tipo": "cctv"
+  },
+  {
+   "id": "G3",
+   "nombre": "GRUPO 3",
+   "tipo": "cctv"
+  },
+  {
+   "id": "GPS",
+   "nombre": "GPS",
+   "tipo": "gps"
+  }
+ ],
+ "operadores": [
+  {
+   "id": "o01",
+   "nombre": "Jeyner Vera",
+   "grupo": "G1"
+  },
+  {
+   "id": "o02",
+   "nombre": "Bryan Mendoza",
+   "grupo": "G1"
+  },
+  {
+   "id": "o03",
+   "nombre": "César Marín",
+   "grupo": "G1"
+  },
+  {
+   "id": "o04",
+   "nombre": "Nathaly Jácome",
+   "grupo": "G1"
+  },
+  {
+   "id": "o05",
+   "nombre": "Jonathan Mora",
+   "grupo": "G1"
+  },
+  {
+   "id": "o06",
+   "nombre": "Kelly Mora",
+   "grupo": "G1"
+  },
+  {
+   "id": "o07",
+   "nombre": "Nicole Cabezas",
+   "grupo": "G1"
+  },
+  {
+   "id": "o08",
+   "nombre": "Cristhian López",
+   "grupo": "G1"
+  },
+  {
+   "id": "o09",
+   "nombre": "David Peña",
+   "grupo": "G1"
+  },
+  {
+   "id": "o10",
+   "nombre": "Jandri Bajaña",
+   "grupo": "G1"
+  },
+  {
+   "id": "o11",
+   "nombre": "Bryan Stiwart",
+   "grupo": "G2"
+  },
+  {
+   "id": "o12",
+   "nombre": "Adrián Delgado",
+   "grupo": "G2"
+  },
+  {
+   "id": "o13",
+   "nombre": "Sabrina Vallejo",
+   "grupo": "G2"
+  },
+  {
+   "id": "o14",
+   "nombre": "Josseelyn Maya",
+   "grupo": "G2"
+  },
+  {
+   "id": "o15",
+   "nombre": "Josué González",
+   "grupo": "G2"
+  },
+  {
+   "id": "o16",
+   "nombre": "Kevin Luna",
+   "grupo": "G2"
+  },
+  {
+   "id": "o17",
+   "nombre": "Luis Mora",
+   "grupo": "G2"
+  },
+  {
+   "id": "o18",
+   "nombre": "Kenneth Alvarado",
+   "grupo": "G2"
+  },
+  {
+   "id": "o19",
+   "nombre": "Liter Cañola",
+   "grupo": "G2"
+  },
+  {
+   "id": "o20",
+   "nombre": "Gilson Cortez",
+   "grupo": "G3"
+  },
+  {
+   "id": "o21",
+   "nombre": "Jairo Alay",
+   "grupo": "G3"
+  },
+  {
+   "id": "o22",
+   "nombre": "Valeria Maquilón",
+   "grupo": "G3"
+  },
+  {
+   "id": "o23",
+   "nombre": "Jefferson Padilla",
+   "grupo": "G3"
+  },
+  {
+   "id": "o24",
+   "nombre": "Janis Gutiérrez",
+   "grupo": "G3"
+  },
+  {
+   "id": "o25",
+   "nombre": "Andrés Landívar",
+   "grupo": "G3"
+  },
+  {
+   "id": "o26",
+   "nombre": "Silvia Saavedra",
+   "grupo": "G3"
+  },
+  {
+   "id": "o27",
+   "nombre": "Oscar Arteaga",
+   "grupo": "G3"
+  },
+  {
+   "id": "o28",
+   "nombre": "Adrián Bone",
+   "grupo": "G3"
+  },
+  {
+   "id": "o29",
+   "nombre": "Héctor Pin",
+   "grupo": "GPS"
+  }
+ ],
+ "categorias": [
+  {
+   "id": "asi",
+   "nombre": "Asistencia y turno",
+   "aplica": "todos",
+   "parametros": [
+    {
+     "id": "asi01",
+     "nombre": "Puntualidad (llegar a tiempo al turno)",
+     "activo": true
+    },
+    {
+     "id": "asi02",
+     "nombre": "Asistencia (turnos cumplidos sin faltas)",
+     "activo": true
+    },
+    {
+     "id": "asi03",
+     "nombre": "Atrasos acumulados en el mes",
+     "activo": true
+    },
+    {
+     "id": "asi04",
+     "nombre": "Permisos solicitados",
+     "activo": true
+    },
+    {
+     "id": "asi05",
+     "nombre": "Horas extra cumplidas",
+     "activo": true
+    },
+    {
+     "id": "asi06",
+     "nombre": "Cobertura de turnos de compañeros",
+     "activo": true
+    },
+    {
+     "id": "asi07",
+     "nombre": "Entrega de turno (novedades al siguiente operador)",
+     "activo": true
+    },
+    {
+     "id": "asi08",
+     "nombre": "Recepción de turno (revisar novedades al entrar)",
+     "activo": true
+    },
+    {
+     "id": "asi09",
+     "nombre": "Abandono del puesto sin aviso",
+     "activo": true
+    }
+   ]
+  },
+  {
+   "id": "det",
+   "nombre": "Detección y monitoreo CCTV",
+   "aplica": "cctv",
+   "parametros": [
+    {
+     "id": "det01",
+     "nombre": "Novedades reportadas (eventos detectados en cámaras)",
+     "activo": true
+    },
+    {
+     "id": "det02",
+     "nombre": "Incidentes no detectados (eventos que se escaparon)",
+     "activo": true
+    },
+    {
+     "id": "det03",
+     "nombre": "Rondas virtuales cumplidas",
+     "activo": true
+    },
+    {
+     "id": "det04",
+     "nombre": "Cámaras revisadas por turno",
+     "activo": true
+    },
+    {
+     "id": "det05",
+     "nombre": "Detección de intrusos o personas no autorizadas",
+     "activo": true
+    },
+    {
+     "id": "det06",
+     "nombre": "Detección de actos y condiciones inseguras",
+     "activo": true
+    },
+    {
+     "id": "det07",
+     "nombre": "Detección de robos o hurtos",
+     "activo": true
+    },
+    {
+     "id": "det08",
+     "nombre": "Falsas alarmas reportadas como reales",
+     "activo": true
+    }
+   ]
+  },
+  {
+   "id": "tie",
+   "nombre": "Tiempos de respuesta",
+   "aplica": "todos",
+   "parametros": [
+    {
+     "id": "tie01",
+     "nombre": "Tiempo de respuesta ante una alarma o evento",
+     "activo": true
+    },
+    {
+     "id": "tie02",
+     "nombre": "Tiempo en avisar al cliente",
+     "activo": true
+    },
+    {
+     "id": "tie03",
+     "nombre": "Tiempo en avisar al guardia o supervisor en sitio",
+     "activo": true
+    },
+    {
+     "id": "tie04",
+     "nombre": "Tiempo en escalar a la policía o al ECU 911",
+     "activo": true
+    },
+    {
+     "id": "tie05",
+     "nombre": "Tiempo en cerrar el evento",
+     "activo": true
+    }
+   ]
+  },
+  {
+   "id": "rep",
+   "nombre": "Reportes y bitácora",
+   "aplica": "todos",
+   "parametros": [
+    {
+     "id": "rep01",
+     "nombre": "Reportes enviados a clientes (WhatsApp o correo)",
+     "activo": true
+    },
+    {
+     "id": "rep02",
+     "nombre": "Calidad del reporte (completo, con foto y hora)",
+     "activo": true
+    },
+    {
+     "id": "rep03",
+     "nombre": "Errores en bitácora",
+     "activo": true
+    },
+    {
+     "id": "rep04",
+     "nombre": "Bitácora completa al final del turno",
+     "activo": true
+    },
+    {
+     "id": "rep05",
+     "nombre": "Evidencias guardadas (fotos y clips)",
+     "activo": true
+    },
+    {
+     "id": "rep06",
+     "nombre": "Ortografía y redacción de los reportes",
+     "activo": true
+    },
+    {
+     "id": "rep07",
+     "nombre": "Informe mensual entregado a tiempo",
+     "activo": true
+    }
+   ]
+  },
+  {
+   "id": "com",
+   "nombre": "Comunicación",
+   "aplica": "todos",
+   "parametros": [
+    {
+     "id": "com01",
+     "nombre": "Llamadas de verificación a clientes o guardias",
+     "activo": true
+    },
+    {
+     "id": "com02",
+     "nombre": "Pruebas de radio o comunicación con los puestos",
+     "activo": true
+    },
+    {
+     "id": "com03",
+     "nombre": "Atención telefónica (contestar a tiempo)",
+     "activo": true
+    },
+    {
+     "id": "com04",
+     "nombre": "Trato al cliente (quejas o felicitaciones)",
+     "activo": true
+    },
+    {
+     "id": "com05",
+     "nombre": "Coordinación con técnicos",
+     "activo": true
+    }
+   ]
+  },
+  {
+   "id": "sop",
+   "nombre": "Soporte técnico y equipos",
+   "aplica": "todos",
+   "parametros": [
+    {
+     "id": "sop01",
+     "nombre": "Cámaras caídas reportadas a tiempo",
+     "activo": true
+    },
+    {
+     "id": "sop02",
+     "nombre": "Grabadores (NVR) sin grabación reportados a tiempo",
+     "activo": true
+    },
+    {
+     "id": "sop03",
+     "nombre": "Fallas de internet reportadas",
+     "activo": true
+    },
+    {
+     "id": "sop04",
+     "nombre": "Seguimiento hasta que se repara la falla",
+     "activo": true
+    },
+    {
+     "id": "sop05",
+     "nombre": "Cuidado de los equipos del centro de monitoreo",
+     "activo": true
+    }
+   ]
+  },
+  {
+   "id": "gps",
+   "nombre": "GPS",
+   "aplica": "gps",
+   "parametros": [
+    {
+     "id": "gps01",
+     "nombre": "Seguimiento GPS de unidades",
+     "activo": true
+    },
+    {
+     "id": "gps02",
+     "nombre": "Alertas GPS atendidas (velocidad, paradas, desvíos)",
+     "activo": true
+    },
+    {
+     "id": "gps03",
+     "nombre": "Unidades sin señal reportadas",
+     "activo": true
+    },
+    {
+     "id": "gps04",
+     "nombre": "Botón de pánico atendido",
+     "activo": true
+    },
+    {
+     "id": "gps05",
+     "nombre": "Reportes de recorrido entregados",
+     "activo": true
+    },
+    {
+     "id": "gps06",
+     "nombre": "Geocercas revisadas",
+     "activo": true
+    }
+   ]
+  },
+  {
+   "id": "con",
+   "nombre": "Conducta y disciplina",
+   "aplica": "todos",
+   "parametros": [
+    {
+     "id": "con01",
+     "nombre": "Cumplimiento de protocolos",
+     "activo": true
+    },
+    {
+     "id": "con02",
+     "nombre": "Uso del celular o distracciones en turno",
+     "activo": true
+    },
+    {
+     "id": "con03",
+     "nombre": "Dormir o descuido en turno",
+     "activo": true
+    },
+    {
+     "id": "con04",
+     "nombre": "Uniforme y presentación",
+     "activo": true
+    },
+    {
+     "id": "con05",
+     "nombre": "Confidencialidad de la información",
+     "activo": true
+    },
+    {
+     "id": "con06",
+     "nombre": "Llamados de atención o sanciones",
+     "activo": true
+    }
+   ]
+  },
+  {
+   "id": "eva",
+   "nombre": "Evaluación y desarrollo",
+   "aplica": "todos",
+   "parametros": [
+    {
+     "id": "eva01",
+     "nombre": "Calificación del supervisor",
+     "activo": true
+    },
+    {
+     "id": "eva02",
+     "nombre": "Felicitaciones o reconocimientos",
+     "activo": true
+    },
+    {
+     "id": "eva03",
+     "nombre": "Capacitaciones asistidas",
+     "activo": true
+    },
+    {
+     "id": "eva04",
+     "nombre": "Evaluaciones aprobadas",
+     "activo": true
+    },
+    {
+     "id": "eva05",
+     "nombre": "Iniciativa y propuestas de mejora",
+     "activo": true
+    },
+    {
+     "id": "eva06",
+     "nombre": "Trabajo en equipo",
+     "activo": true
+    }
+   ]
+  }
+ ],
+ "evaluaciones": {},
+ "turnos": [
+  {
+   "id": "D",
+   "nombre": "Día",
+   "entrada": "",
+   "salida": "",
+   "trabaja": true
+  },
+  {
+   "id": "N",
+   "nombre": "Noche",
+   "entrada": "",
+   "salida": "",
+   "trabaja": true
+  },
+  {
+   "id": "L",
+   "nombre": "Libre",
+   "entrada": "",
+   "salida": "",
+   "trabaja": false
+  },
+  {
+   "id": "V",
+   "nombre": "Vacaciones",
+   "entrada": "",
+   "salida": "",
+   "trabaja": false
+  },
+  {
+   "id": "P",
+   "nombre": "Permiso",
+   "entrada": "",
+   "salida": "",
+   "trabaja": false
+  }
+ ],
+ "rotacion": {
+  "nota": "Ciclo de 6 días por grupo. El 24/11/2026: GRUPO 1 en su 2.º día, GRUPO 2 en su 2.ª noche, GRUPO 3 en su 2.º libre.",
+  "ciclo": [
+   "D",
+   "D",
+   "N",
+   "N",
+   "L",
+   "L"
+  ],
+  "fecha": "2026-11-24",
+  "posicion": {
+   "G1": 1,
+   "G2": 3,
+   "G3": 5
+  }
+ },
+ "horarios": {}
+}

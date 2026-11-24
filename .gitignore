@@ -1,0 +1,4 @@
+# No se publica: respaldos, historial de cambios y archivos de trabajo
+data/respaldos/
+data/cambios.log
+grupos-operadores.csv
