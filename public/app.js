@@ -2,7 +2,7 @@
 // KPI de operadores por semana, mes y año. Los datos viven en data\datos.json (los guarda el servidor local).
 'use strict';
 
-const S = { datos: null, version: '', rol: 'admin', local: false, per: null };
+const S = { datos: null, version: '', rol: 'visitante', nombre: '', correo: '', local: false, per: null };
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 const PESTANAS = [['resumen', 'Resumen'], ['operadores', 'Operadores'], ['grupos', 'Grupos'], ['horario', 'Horario'], ['evaluar', 'Evaluar'], ['parametros', 'Parámetros']];
 const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -212,7 +212,7 @@ function vResumen(c) {
       <div class="portada-texto">
         <span class="en-vivo"><i></i> Centro de monitoreo 24/7</span>
         <h1>Portal de <span class="grad">DESEMPEÑO</span></h1>
-        <p>Administrador · KPI de ${ops.length} operadores en ${S.datos.grupos.length} grupos</p>
+        <p>KPI de ${ops.length} operadores en ${S.datos.grupos.length} grupos</p>
       </div>
     </div>
     <div class="encabezado"><div><h1>${esc(nombrePeriodo())}</h1><p>Evaluación ${S.per.tipo === 'semana' ? 'semanal' : S.per.tipo === 'mes' ? 'mensual' : 'anual'} · ${nParam} parámetros activos</p></div>${selectorPeriodo()}</div>
@@ -325,6 +325,9 @@ function vEvaluar(c, args) {
   const evSem = S.datos.evaluaciones[semana] || {};
   const semanas = []; aniosDisponibles().forEach((y) => semanasDelAnio(y).forEach((s) => { if (s <= SEMANA_ACTUAL) semanas.push(s); }));
   const ev = op ? evSem[op.id] || { notas: {} } : null;
+  // Supervisor: una vez guardada, la evaluación queda bloqueada. Solo el administrador la cambia o la borra.
+  const bloqueada = !!(op && evSem[op.id] && S.rol !== 'admin');
+  const quien = op && evSem[op.id] ? `Calificado${ev.por ? ` por ${esc(ev.por)}` : ''}${ev.fecha ? ` el ${esc(ev.fecha.split('-').reverse().join('/'))}` : ''}` : '';
   c.innerHTML = `
     <div class="encabezado"><div><h1>Evaluación semanal</h1><p>Califica cada parámetro de 1 a 10. Lo que dejes en "—" no cuenta para el puntaje.</p></div>
       <div class="periodo"><select id="ev-semana">${semanas.sort().reverse().map((s) => `<option value="${s}" ${s === semana ? 'selected' : ''}>${nombreSemana(s)}${s === SEMANA_ACTUAL ? ' (actual)' : ''}</option>`).join('')}</select></div></div>
@@ -333,10 +336,12 @@ function vEvaluar(c, args) {
         ${ops.map((o) => `<a href="#/evaluar/${semana}/${o.id}" class="${op && op.id === o.id ? 'sel' : ''}"><span>${esc(o.nombre)}</span>${evSem[o.id] ? `<span class="chip e-activo">${Math.round(puntaje(o.id, [semana]) ?? 0)}</span>` : '<span class="chip e-por-ingresar">Pendiente</span>'}</a>`).join('')}`; }).join('')}</div></div>
       <div>${op ? `<a class="btn mini volver" href="#/evaluar/${semana}">← Volver</a>
         <form class="panel" id="form-ev">
-          ${titulo('lapiz', esc(op.nombre), `${esc(grupo(op.grupo).nombre)} · ${esc(nombreSemana(semana))}`)}
-          ${categoriasDe(op).map((cat) => `<h3>${esc(cat.nombre)}</h3><div class="ev-grid">${cat.parametros.filter((p) => p.activo).map((p) => `<label class="ev-item"><span>${esc(p.nombre)}</span><select name="${p.id}"><option value="">—</option>${Array.from({ length: 10 }, (_, i) => 10 - i).map((n) => `<option ${ev.notas[p.id] === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label>`).join('')}</div>`).join('')}
-          <h3>Observación</h3><textarea name="observacion" rows="3" placeholder="Comentario de la semana (opcional)">${esc(ev.observacion || '')}</textarea>
-          <div class="acciones" style="margin-top:14px"><button class="btn prim" type="submit">Guardar evaluación</button>${evSem[op.id] ? '<button class="btn peligro" type="button" id="borrar-ev">Borrar evaluación</button>' : ''}<span class="ev-total" id="ev-total"></span></div>
+          ${titulo('lapiz', esc(op.nombre), `${esc(grupo(op.grupo).nombre)} · ${esc(nombreSemana(semana))}${quien ? ` · ${quien}` : ''}`)}
+          ${bloqueada ? '<p class="aviso-bloqueo">🔒 Esta evaluación ya fue guardada y quedó bloqueada. Si hay que corregirla, pídeselo al administrador.</p>' : ''}
+          ${!evSem[op.id] && S.rol !== 'admin' ? '<p class="aviso-bloqueo suave">Revisa bien antes de guardar: después ya no se puede cambiar.</p>' : ''}
+          ${categoriasDe(op).map((cat) => `<h3>${esc(cat.nombre)}</h3><div class="ev-grid">${cat.parametros.filter((p) => p.activo).map((p) => `<label class="ev-item"><span>${esc(p.nombre)}</span><select name="${p.id}" ${bloqueada ? 'disabled' : ''}><option value="">—</option>${Array.from({ length: 10 }, (_, i) => 10 - i).map((n) => `<option ${ev.notas[p.id] === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label>`).join('')}</div>`).join('')}
+          <h3>Observación</h3><textarea name="observacion" rows="3" placeholder="Comentario de la semana (opcional)" ${bloqueada ? 'disabled' : ''}>${esc(ev.observacion || '')}</textarea>
+          <div class="acciones" style="margin-top:14px">${bloqueada ? '' : `<button class="btn prim" type="submit">Guardar evaluación</button>${evSem[op.id] ? '<button class="btn peligro" type="button" id="borrar-ev">Borrar evaluación</button>' : ''}`}<span class="ev-total" id="ev-total"></span></div>
         </form>` : `<div class="panel">${titulo('check', 'Elige un operador', `Avance de ${esc(nombreSemana(semana))}: ${Object.keys(evSem).length} de ${S.datos.operadores.length} operadores evaluados.`)}</div>`}</div>
     </div>`;
   $('#ev-semana', c).addEventListener('change', (e) => { location.hash = `#/evaluar/${e.target.value}${op ? `/${op.id}` : ''}`; });
@@ -348,9 +353,9 @@ function vEvaluar(c, args) {
     e.preventDefault();
     const n = {}; $$('select', f).forEach((s) => { if (s.value) n[s.name] = Number(s.value); });
     if (!Object.keys(n).length) { toast('Califica al menos un parámetro.'); return; }
-    S.datos.evaluaciones[semana] = S.datos.evaluaciones[semana] || {};
-    S.datos.evaluaciones[semana][op.id] = { notas: n, observacion: f.observacion.value.trim(), fecha: new Date().toISOString().slice(0, 10) };
-    if (await guardar(`Evaluación ${semana} · ${op.nombre}`)) {
+    if (S.rol !== 'admin' && !confirm(`¿Guardar la evaluación de ${op.nombre}? Después ya no se podrá cambiar.`)) return;
+    const nueva = { notas: n, observacion: f.observacion.value.trim(), fecha: new Date().toISOString().slice(0, 10), por: S.nombre || '' };
+    if (await guardarEvaluacion(semana, op, nueva)) {
       toast(`Evaluación de ${op.nombre} guardada.`);
       const sig = S.datos.operadores.find((o) => !S.datos.evaluaciones[semana][o.id]);
       location.hash = sig ? `#/evaluar/${semana}/${sig.id}` : `#/evaluar/${semana}`;
@@ -359,9 +364,7 @@ function vEvaluar(c, args) {
   const b = $('#borrar-ev', f);
   if (b) b.addEventListener('click', async () => {
     if (!confirm(`¿Borrar la evaluación de ${op.nombre} de esta semana?`)) return;
-    delete S.datos.evaluaciones[semana][op.id];
-    if (!Object.keys(S.datos.evaluaciones[semana]).length) delete S.datos.evaluaciones[semana];
-    if (await guardar(`Borrada evaluación ${semana} · ${op.nombre}`)) { toast('Evaluación borrada.'); mostrar(); }
+    if (await guardarEvaluacion(semana, op, null)) { toast('Evaluación borrada.'); mostrar(); }
   });
 }
 
@@ -521,36 +524,184 @@ function vHorario(c, args) {
   });
 }
 
-// ---------------- Guardar en el servidor local ----------------
+// ---------------- Conexión con los datos ----------------
+// En GitHub la página usa el API de Cloudflare (usuarios y base de datos). En esta computadora, el servidor local.
+const EN_GITHUB = /\.github\.io$/i.test(location.hostname);
+const API = EN_GITHUB ? 'https://portal-desempeno.pages.dev' : '';
+const ROLES = { admin: 'Administrador', supervisor: 'Supervisor' };
+const leerToken = () => { try { return localStorage.getItem('kpi-token') || ''; } catch (e) { return ''; } };
+const ponerToken = (t) => { try { if (t) localStorage.setItem('kpi-token', t); else localStorage.removeItem('kpi-token'); } catch (e) { /* sin almacenamiento */ } };
+function api(ruta, op = {}) {
+  const headers = { ...(op.headers || {}) };
+  const t = leerToken();
+  if (API && t) headers.Authorization = `Bearer ${t}`;
+  return fetch(API + ruta, { cache: 'no-store', ...op, headers });
+}
+function sesionVencida() {
+  ponerToken(''); S.rol = 'visitante'; S.nombre = ''; S.correo = '';
+  pintarUsuario(); toast('Tu sesión terminó. Vuelve a ingresar.'); location.hash = '#/ingresar';
+}
+
+async function cargarDatos() {
+  const r = await api('/api/datos');
+  if (!r.ok) throw new Error(r.status);
+  S.version = r.headers.get('X-Version') || '';
+  S.datos = await r.json();
+  if (!S.datos.turnos) S.datos.turnos = JSON.parse(JSON.stringify(TURNOS_BASE));
+  if (!S.datos.horarios) S.datos.horarios = {};
+  if (!S.datos.evaluaciones) S.datos.evaluaciones = {};
+  S.cargado = Date.now();
+}
+
+// Parámetros, horario, rotación y turnos (solo administrador)
 async function guardar(motivo) {
   try {
-    const r = await fetch('/api/datos', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Motivo': encodeURIComponent(motivo), 'X-Version': S.version }, body: JSON.stringify(S.datos, null, 1) });
-    if (r.status === 409) { toast('Los datos cambiaron en otra ventana. Recarga la página.'); return false; }
+    const r = await api('/api/datos', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-Motivo': encodeURIComponent(motivo), 'X-Version': S.version }, body: JSON.stringify(S.datos, null, 1) });
+    if (r.status === 401) { sesionVencida(); return false; }
+    if (r.status === 409) { await cargarDatos(); toast('Otra persona guardó cambios hace un momento. Se recargó la información: repite tu cambio.'); mostrar(); return false; }
     if (!r.ok) throw new Error(r.status);
     S.version = r.headers.get('X-Version') || S.version;
     return true;
-  } catch (e) { toast('No se pudo guardar. ¿Está encendido el servidor?'); return false; }
+  } catch (e) { toast(API ? 'No se pudo guardar. Revisa tu conexión a internet.' : 'No se pudo guardar. ¿Está encendido el servidor?'); return false; }
 }
-function toast(t) { const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 3500); }
+
+// Evaluación de un operador (ev = null para borrarla)
+async function guardarEvaluacion(semana, op, ev) {
+  const quitarLocal = () => { delete (S.datos.evaluaciones[semana] || {})[op.id]; if (S.datos.evaluaciones[semana] && !Object.keys(S.datos.evaluaciones[semana]).length) delete S.datos.evaluaciones[semana]; };
+  if (!API) { // servidor local: se guarda todo el archivo
+    if (ev) (S.datos.evaluaciones[semana] = S.datos.evaluaciones[semana] || {})[op.id] = ev; else quitarLocal();
+    return guardar(`${ev ? 'Evaluación' : 'Borrada evaluación'} ${semana} · ${op.nombre}`);
+  }
+  try {
+    const r = ev
+      ? await api('/api/evaluacion', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ semana, op: op.id, notas: ev.notas, observacion: ev.observacion }) })
+      : await api(`/api/evaluacion?semana=${encodeURIComponent(semana)}&op=${encodeURIComponent(op.id)}`, { method: 'DELETE' });
+    if (r.status === 401) { sesionVencida(); return false; }
+    const b = await r.json().catch(() => ({}));
+    if (!r.ok) { toast(b.error || 'No se pudo guardar.'); if (r.status === 409) { await cargarDatos(); mostrar(); } return false; }
+    if (ev) (S.datos.evaluaciones[semana] = S.datos.evaluaciones[semana] || {})[op.id] = b; else quitarLocal();
+    return true;
+  } catch (e) { toast('No se pudo guardar. Revisa tu conexión a internet.'); return false; }
+}
+function toast(t) { const el = $('#toast'); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 4500); }
 function activarFilas(raiz) { $$('[data-ir]', raiz).forEach((tr) => tr.addEventListener('click', () => { location.hash = tr.dataset.ir; })); }
 
+// ---------------- Ingresar ----------------
+async function vIngresar(c) {
+  if (S.rol !== 'visitante') { location.hash = '#/resumen'; return; }
+  c.innerHTML = '<p class="cargando">Cargando…</p>';
+  let configurado = true;
+  try { configurado = (await (await api('/api/estado')).json()).configurado; } catch (e) { /* se intenta ingresar igual */ }
+  c.innerHTML = `<form class="panel ingreso" id="f-ing">
+      ${titulo('usuario', configurado ? 'Ingresar' : 'Crear cuenta de administrador', configurado ? 'Supervisores y administrador: ingresa para calificar a tus operadores.' : 'Primera vez: usa el código que está en la carpeta del portal (data\\codigo-inicial.txt).')}
+      ${configurado ? '' : `<label>Código inicial<input name="codigo" autocomplete="off" required></label><label>Tu nombre<input name="nombre" autocomplete="name" required></label>`}
+      <label>Correo<input name="correo" type="email" autocomplete="username" required></label>
+      <label>Contraseña${configurado ? '' : ' (mínimo 8 caracteres)'}<input name="clave" type="password" autocomplete="${configurado ? 'current-password' : 'new-password'}" required></label>
+      <div class="acciones"><button class="btn prim" type="submit">${configurado ? 'Ingresar' : 'Crear y entrar'}</button><a class="btn" href="#/resumen">Ver sin ingresar</a></div>
+      <p class="error" id="ing-err"></p>
+    </form>`;
+  const f = $('#f-ing', c);
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const b = $('button[type=submit]', f); b.disabled = true; $('#ing-err', c).textContent = '';
+    const cuerpo = { correo: f.correo.value, clave: f.clave.value, ...(configurado ? {} : { codigo: f.codigo.value, nombre: f.nombre.value }) };
+    try {
+      const r = await api(configurado ? '/api/login' : '/api/setup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || 'No se pudo ingresar');
+      ponerToken(d.token); S.rol = d.rol; S.nombre = d.nombre; S.correo = d.correo;
+      pintarUsuario(); toast(`Bienvenido, ${d.nombre || d.correo}.`);
+      location.hash = d.rol === 'admin' ? '#/resumen' : '#/evaluar';
+    } catch (err) { $('#ing-err', c).textContent = err.message === 'Failed to fetch' ? 'Sin conexión' : err.message; b.disabled = false; }
+  });
+}
+
+// ---------------- Usuarios (solo administrador) ----------------
+async function vUsuarios(c) {
+  c.innerHTML = '<p class="cargando">Cargando usuarios…</p>';
+  const [ru, ra] = await Promise.all([api('/api/usuarios'), api('/api/accesos')]);
+  if (ru.status === 401) { sesionVencida(); return; }
+  let usuarios = ru.ok ? await ru.json() : [];
+  const accesos = ra.ok ? await ra.json() : [];
+  const opcionesRol = (sel) => Object.entries(ROLES).map(([k, n]) => `<option value="${k}" ${k === sel ? 'selected' : ''}>${n}</option>`).join('');
+  c.innerHTML = `<div class="encabezado"><div><h1>Usuarios</h1><p>Quién puede ingresar a calificar. El <strong>Supervisor</strong> califica operadores y, una vez guardada, la evaluación queda bloqueada. El <strong>Administrador</strong> cambia todo.</p></div></div>
+    <div class="panel">${titulo('grupo', 'Usuarios con acceso', `${usuarios.length} usuario${usuarios.length === 1 ? '' : 's'}`)}
+      <div class="acciones"><button class="btn prim" id="u-nuevo">+ Nuevo usuario</button></div>
+      <div id="form-usuario" class="form-usuario" hidden></div>
+      <div class="tabla-scroll" id="tabla-usuarios"></div></div>
+    <div class="panel">${titulo('calendario', 'Registro de accesos', 'Quién entró y qué guardó (últimos 500)')}
+      <div class="tabla-scroll"><table><thead><tr><th>Fecha y hora</th><th>Usuario</th><th>Rol</th><th>Acción</th><th>Lugar</th></tr></thead>
+      <tbody>${accesos.map((a) => `<tr class="${/fallido|bloqueado/i.test(a.accion) ? 'fila-alerta' : ''}"><td>${esc(new Date(a.fecha).toLocaleString('es-EC'))}</td><td>${esc(a.correo)}</td><td>${esc(ROLES[a.rol] || a.rol || '—')}</td><td>${esc(a.accion)}</td><td>${esc(a.lugar || '')}</td></tr>`).join('') || '<tr><td colspan="5" class="vacio">Sin movimientos</td></tr>'}</tbody></table></div></div>`;
+  const pintar = () => {
+    $('#tabla-usuarios', c).innerHTML = `<table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Último ingreso</th><th></th></tr></thead><tbody>${usuarios.map((u) => {
+      const ult = accesos.find((a) => a.correo === u.correo && a.accion === 'Ingresó al portal');
+      return `<tr><td>${esc(u.nombre)}</td><td>${esc(u.correo)}</td><td><span class="chip">${esc(ROLES[u.rol] || u.rol)}</span></td><td>${ult ? esc(new Date(ult.fecha).toLocaleString('es-EC')) : '<span class="vacio">Nunca</span>'}</td>
+        <td class="n"><button class="btn mini" data-edit="${esc(u.correo)}">Editar</button> ${u.correo === S.correo ? '' : `<button class="btn mini peligro" data-del="${esc(u.correo)}">Quitar</button>`}</td></tr>`;
+    }).join('')}</tbody></table>`;
+    $$('[data-edit]', c).forEach((b) => b.addEventListener('click', () => form(usuarios.find((u) => u.correo === b.dataset.edit))));
+    $$('[data-del]', c).forEach((b) => b.addEventListener('click', async () => {
+      if (!confirm(`¿Quitar el acceso de ${b.dataset.del}? Ya no podrá ingresar.`)) return;
+      const r = await api(`/api/usuarios?correo=${encodeURIComponent(b.dataset.del)}`, { method: 'DELETE' });
+      const d = await r.json().catch(() => ({}));
+      if (r.ok) { usuarios = d.lista; pintar(); toast('Acceso quitado.'); } else toast(d.error || 'No se pudo quitar');
+    }));
+  };
+  const form = (u) => {
+    const el = $('#form-usuario', c); el.hidden = false;
+    el.innerHTML = `<h3>${u ? 'Editar usuario' : 'Nuevo usuario'}</h3>
+      <div class="campos-usuario">
+        <div><label>Nombre</label><input id="u-nombre" value="${esc(u ? u.nombre : '')}" placeholder="Nombre y apellido"></div>
+        <div><label>Correo</label><input id="u-correo" type="email" value="${esc(u ? u.correo : '')}" ${u ? 'readonly' : ''} placeholder="correo@telearseg.net"></div>
+        <div><label>Rol</label><select id="u-rol">${opcionesRol(u ? u.rol : 'supervisor')}</select></div>
+        <div><label>${u ? 'Nueva contraseña (vacío = no cambiar)' : 'Contraseña (mínimo 8)'}</label><input id="u-clave" type="text" autocomplete="off"></div>
+      </div>
+      <div class="acciones"><button class="btn prim" id="u-guardar">Guardar</button><button class="btn" id="u-cancelar">Cancelar</button></div>`;
+    $('#u-cancelar', el).addEventListener('click', () => { el.hidden = true; });
+    $('#u-guardar', el).addEventListener('click', async () => {
+      const cuerpo = { nombre: $('#u-nombre', el).value, correo: $('#u-correo', el).value, rol: $('#u-rol', el).value, clave: $('#u-clave', el).value };
+      const r = await api('/api/usuarios', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { toast(d.error || 'No se pudo guardar'); return; }
+      usuarios = d.lista; if (d.token) ponerToken(d.token);
+      el.hidden = true; pintar(); toast('Usuario guardado. Pásale su correo y contraseña por un medio privado.');
+    });
+  };
+  $('#u-nuevo', c).addEventListener('click', () => form(null));
+  pintar();
+}
+
 // ---------------- Navegación ----------------
-const VISTAS = { resumen: vResumen, operadores: vOperadores, grupos: vGrupos, horario: vHorario, evaluar: vEvaluar, parametros: vParametros };
-// Copia publicada en GitHub Pages: solo lectura, sin Evaluar ni Parámetros
-const PUBLICADO = /\.github\.io$/i.test(location.hostname);
-const SOLO_EDICION = ['evaluar', 'parametros'];
-const NAVEGAR = ['h-semana', 'fg', 'periodo-clave', 'q'];
+const VISTAS = { resumen: vResumen, operadores: vOperadores, grupos: vGrupos, horario: vHorario, evaluar: vEvaluar, parametros: vParametros, usuarios: vUsuarios, ingresar: vIngresar };
+const NAVEGAR = ['h-semana', 'fg', 'periodo-clave', 'q', 'ev-semana'];
+// Qué ve cada uno: visitante (sin ingresar) solo mira; supervisor además califica; administrador todo
+function pestanasDe(rol) {
+  const p = { visitante: ['resumen', 'operadores', 'grupos', 'horario'], supervisor: ['resumen', 'operadores', 'grupos', 'horario', 'evaluar'] }[rol];
+  const todas = [...PESTANAS, ...(API ? [['usuarios', 'Usuarios']] : [])];
+  return p ? todas.filter(([k]) => p.includes(k)) : todas;
+}
+function pintarUsuario() {
+  const u = $('#usuario');
+  if (S.rol === 'visitante') u.innerHTML = '<span class="chip e-pasivo">Solo lectura</span><a class="btn mini prim" href="#/ingresar">Ingresar</a>';
+  else if (!API) u.innerHTML = '<span class="chip e-activo">Administrador</span>';
+  else {
+    u.innerHTML = `<span class="u-nombre">${esc(S.nombre || S.correo)}</span><span class="chip e-activo">${esc(ROLES[S.rol] || S.rol)}</span><a class="btn mini" href="#" id="salir">Salir</a>`;
+    $('#salir').addEventListener('click', (e) => { e.preventDefault(); ponerToken(''); S.rol = 'visitante'; S.nombre = ''; S.correo = ''; pintarUsuario(); location.hash = '#/resumen'; mostrar(); toast('Sesión cerrada.'); });
+  }
+}
 function mostrar() {
   const partes = (location.hash.replace(/^#\/?/, '') || 'resumen').split('/');
+  const tabs = pestanasDe(S.rol);
   let vista = VISTAS[partes[0]] ? partes[0] : 'resumen';
-  if (S.soloLectura && SOLO_EDICION.includes(vista)) vista = 'resumen';
-  $('#menu').innerHTML = PESTANAS.filter(([k]) => !S.soloLectura || !SOLO_EDICION.includes(k)).map(([k, n]) => `<a href="#/${k}" class="${k === vista ? 'activo' : ''}">${n}</a>`).join('');
+  if (vista === 'ingresar' && !API) vista = 'resumen';
+  if (vista !== 'ingresar' && !tabs.some(([k]) => k === vista)) vista = S.rol === 'visitante' && ['evaluar', 'parametros', 'usuarios'].includes(vista) ? 'ingresar' : 'resumen';
+  $('#menu').innerHTML = tabs.map(([k, n]) => `<a href="#/${k}" class="${k === vista ? 'activo' : ''}">${n}</a>`).join('');
   const c = $('#contenido');
   VISTAS[vista](c, partes.slice(1).map(decodeURIComponent));
-  if (S.soloLectura) {
-    // Se ve todo, pero nada se puede cambiar
+  if (S.rol !== 'admin' && vista !== 'evaluar' && vista !== 'ingresar') {
+    // Se ve todo, pero solo el administrador cambia horario y parámetros
     $$('input, select, textarea', c).forEach((el) => { if (!NAVEGAR.includes(el.id)) el.disabled = true; });
-    $$('button.btn, a[href^="#/evaluar"], #h-estado', c).forEach((el) => { el.hidden = true; });
+    $$('button.btn, #h-estado', c).forEach((el) => { el.hidden = true; });
+    if (S.rol === 'visitante') $$('a[href^="#/evaluar"]', c).forEach((el) => { el.hidden = true; });
     $$('.aviso-vacio p', c).forEach((p) => { p.innerHTML = p.innerHTML.replace(/Los indicadores se llenan[^]*$/, 'Los indicadores aparecerán cuando se registren las evaluaciones.'); });
   }
 }
@@ -558,32 +709,34 @@ function mostrar() {
 async function iniciar() {
   try { const g = JSON.parse(localStorage.getItem('kpi-periodo')); if (g && g.tipo && g.clave) S.per = g; } catch (e) { /* sin almacenamiento */ }
   if (!S.per) S.per = { tipo: 'semana', clave: SEMANA_ACTUAL };
-  if (PUBLICADO) {
-    try {
-      S.datos = await (await fetch('../data/datos.json', { cache: 'no-store' })).json();
-      S.soloLectura = true;
-    } catch (e) { $('#contenido').innerHTML = '<div class="panel aviso-vacio"><h2>No se pudo cargar la información</h2></div>'; return; }
-    if (!S.datos.turnos) S.datos.turnos = JSON.parse(JSON.stringify(TURNOS_BASE));
-    if (!S.datos.horarios) S.datos.horarios = {};
-    $('#usuario').innerHTML = '<span class="chip e-pasivo">Solo lectura</span>';
-    window.addEventListener('hashchange', mostrar);
-    mostrar();
-    return;
-  }
+  S.rol = 'visitante';
   try {
-    const [rs, rd] = await Promise.all([fetch('/api/sesion'), fetch('/api/datos', { cache: 'no-store' })]);
-    const ses = await rs.json(); S.rol = ses.rol; S.local = ses.local;
-    S.version = rd.headers.get('X-Version') || '';
-    S.datos = await rd.json();
-    if (!S.datos.turnos) S.datos.turnos = JSON.parse(JSON.stringify(TURNOS_BASE));
-    if (!S.datos.horarios) S.datos.horarios = {};
+    if (API) {
+      const t = leerToken();
+      const [rs] = await Promise.all([t ? api('/api/sesion') : null, cargarDatos()]);
+      if (rs && rs.ok) { const s = await rs.json(); S.rol = s.rol; S.nombre = s.nombre; S.correo = s.correo; } else if (t) ponerToken('');
+    } else {
+      const [rs] = await Promise.all([fetch('/api/sesion'), cargarDatos()]);
+      const s = await rs.json(); S.rol = s.rol; S.local = s.local;
+    }
   } catch (e) {
-    $('#contenido').innerHTML = '<div class="panel aviso-vacio"><h2>No se pudo cargar la información</h2><p>Abre el portal con el servidor local: <code>herramientas\\servidor.ps1</code> y entra a http://localhost:8081/</p></div>';
-    return;
+    if (EN_GITHUB && !S.datos) { // sin conexión con el API: se muestra la última copia publicada
+      try { S.datos = await (await fetch('../data/datos.json', { cache: 'no-store' })).json(); S.sinApi = true; } catch (e2) { /* nada */ }
+      if (S.datos) { S.datos.turnos = S.datos.turnos || JSON.parse(JSON.stringify(TURNOS_BASE)); S.datos.horarios = S.datos.horarios || {}; S.datos.evaluaciones = S.datos.evaluaciones || {}; }
+    }
+    if (!S.datos) {
+      $('#contenido').innerHTML = `<div class="panel aviso-vacio"><h2>No se pudo cargar la información</h2><p>${API ? 'Revisa tu conexión a internet y recarga la página.' : 'Abre el portal con el servidor local: <code>herramientas\\servidor.ps1</code> y entra a http://localhost:8081/'}</p></div>`;
+      return;
+    }
   }
-  $('#usuario').innerHTML = '<span class="chip e-activo">Administrador</span>';
-  if (S.local) { const a = $('#aviso-local'); a.hidden = false; a.textContent = 'Trabajando en esta computadora: nadie más puede ver esta página todavía. Las evaluaciones se guardan en la carpeta del proyecto (data\\datos.json).'; }
-  window.addEventListener('hashchange', mostrar);
+  pintarUsuario();
+  if (S.local) { const a = $('#aviso-local'); a.hidden = false; a.textContent = 'Trabajando en esta computadora: estos datos NO son los del link. Para calificar en línea usa https://jefaturatelearseg.github.io/portal-desempeno/public/'; }
+  if (S.sinApi) { const a = $('#aviso-local'); a.hidden = false; a.textContent = 'Sin conexión con la base de datos: se muestra una copia antigua y no se puede ingresar.'; }
+  window.addEventListener('hashchange', async () => {
+    // Si pasó más de medio minuto, se trae lo último que guardaron los demás
+    if (API && !S.sinApi && Date.now() - (S.cargado || 0) > 30000) { try { await cargarDatos(); } catch (e) { /* se sigue con lo que hay */ } }
+    mostrar();
+  });
   mostrar();
 }
 iniciar();

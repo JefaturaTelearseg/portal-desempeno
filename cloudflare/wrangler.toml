@@ -1,0 +1,8 @@
+name = "portal-desempeno"
+pages_build_output_dir = "./sitio"
+compatibility_date = "2026-11-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "portal-desempeno"
+database_id = "f0fbafba-4b73-4087-a9a0-03b7caa8b5e1"

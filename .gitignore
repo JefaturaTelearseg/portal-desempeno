@@ -2,3 +2,6 @@
 data/respaldos/
 data/cambios.log
 grupos-operadores.csv
+data/codigo-inicial.txt
+cloudflare/sitio/
+cloudflare/.wrangler/
